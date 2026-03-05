@@ -1,30 +1,27 @@
 /**
  * --------------------------------------------------------------------------
- * Search Terms N-Gram Analyzer - Google Ads Script for SMBs
+ * search-terms-n-gram-analyzer - Google Ads Script for SMBs
  * --------------------------------------------------------------------------
- * Analyze search term N-grams to identify hidden money-wasting words and extract negative keyword opportunities.
- *
  * Author: Thibault Fayol - Consultant SEA PME
  * Website: https://thibaultfayol.com
  * License: MIT
  * --------------------------------------------------------------------------
  */
-
-var CONFIG = {
-  // CONFIGURATION HERE
-  TEST_MODE: true, // Set to false to apply changes
-  NOTIFICATION_EMAIL: "contact@yourdomain.com"
-};
-
+var CONFIG = { TEST_MODE: true, LOOKBACK: "LAST_30_DAYS", COST_THRESHOLD: 10, NOTIFICATION_EMAIL: "contact@domain.com" };
 function main() {
-  Logger.log("Starting Search Terms N-Gram Analyzer...");
-  // Core Logic Here
-  
-  if (CONFIG.TEST_MODE) {
-    Logger.log("Test mode active: No changes will be applied.");
-  } else {
-    // Apply changes
+  Logger.log("Starting N-gram Analyzer...");
+  var report = AdsApp.report("SELECT Query, Cost FROM SEARCH_QUERY_PERFORMANCE_REPORT WHERE Cost > " + CONFIG.COST_THRESHOLD + " AND Conversions = 0 DURING " + CONFIG.LOOKBACK);
+  var rows = report.rows();
+  var wordsCost = {};
+  while(rows.hasNext()) {
+    var row = rows.next();
+    var words = row["Query"].split(" ");
+    for(var i=0; i<words.length; i++) {
+        var w = words[i];
+        if(!wordsCost[w]) wordsCost[w] = 0;
+        wordsCost[w] += parseFloat(row["Cost"]);
+    }
   }
-  
-  Logger.log("Finished.");
+  Logger.log("Top wasting words:");
+  for (var w in wordsCost) { if(wordsCost[w] > CONFIG.COST_THRESHOLD) Logger.log(w + ": $" + wordsCost[w]); }
 }
