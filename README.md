@@ -1,46 +1,49 @@
 # Search Terms N-Gram Analyzer
 
-Google Ads Script to automate your workflow.  
-Script Google Ads pour automatiser votre gestion SEA.  
+A Google Ads Script that analyzes search term reports to identify costly word patterns using n-gram analysis. Surfaces money-wasting unigrams, bigrams, and trigrams sorted by cost.
 
----
-## 🌍 Languages | Langues
-- 🇬🇧 English version → below  
-- 🇫🇷 Version française → plus bas  
+## What It Does
 
----
+- Pulls all search terms with cost via GAQL
+- Breaks each search term into configurable n-grams (1-word, 2-word, 3-word patterns)
+- Aggregates cost, clicks, impressions, and conversions per n-gram
+- Sorts by cost descending to surface the biggest money wasters
+- Sends an email report and optionally exports to a Google Sheet
 
-# 🇬🇧 English: Search Terms N-Gram Analyzer
+## Setup
 
-## 🎯 What it does
-Broad match queries can be expensive. This script analyzes search terms in N-grams to easily spot and exclude wasted ad spend.
-- **Keywords/SEO:** script analyse termes de recherche google ads, n-gram script search terms ads, script mots clés négatifs automatiques
+1. In Google Ads, go to **Tools & Settings > Bulk Actions > Scripts**
+2. Paste the contents of `main_en.gs` (or `main_fr.gs` for French)
+3. Update the `CONFIG` values
+4. Set `TEST_MODE` to `false` when ready
+5. Schedule the script weekly
 
-## ⚙️ Setup
-1. In **Google Ads → Tools & settings → Scripts → New script**.
-2. Paste the content of `main_en.gs`.
-3. Set `TEST_MODE = true` for safety, then preview.
+## CONFIG Reference
 
----
+| Parameter            | Type    | Default        | Description                                              |
+|----------------------|---------|----------------|----------------------------------------------------------|
+| `TEST_MODE`          | Boolean | `true`         | No functional difference — report is always sent          |
+| `NOTIFICATION_EMAIL` | String  | —              | Email address for the n-gram analysis report              |
+| `SHEET_URL`          | String  | `''`           | Optional Google Sheet URL for export (empty = skip)       |
+| `NGRAM_SIZES`        | Array   | `[1, 2, 3]`   | Which n-gram sizes to analyze                             |
+| `MIN_COST`           | Number  | `5`            | Minimum aggregated cost to include an n-gram              |
+| `MIN_IMPRESSIONS`    | Number  | `10`           | Minimum impressions to include                            |
+| `TOP_N`              | Number  | `50`           | Number of top n-grams in the report                       |
+| `DATE_RANGE`         | String  | `LAST_30_DAYS` | GAQL date range                                           |
 
-# 🇫🇷 Français : Search Terms N-Gram Analyzer
+## How It Works
 
-## 🎯 Ce que fait le script
-Les requêtes larges coûtent cher. Ce script analyse les mots individuels et génère un rapport des mots les plus coûteux sans conversion.
-- **Mots-clés/SEO :** script analyse termes de recherche google ads, n-gram script search terms ads, script mots clés négatifs automatiques
+1. Runs a GAQL query on `search_term_view`
+2. Generates all n-grams of configured sizes from each term
+3. Aggregates metrics per unique n-gram
+4. Filters, sorts by cost, and takes top N
+5. Sends email report and optionally writes to Sheet
 
-## ⚙️ Installation
-1. Dans **Google Ads → Outils & paramètres → Scripts → Nouveau script**.
-2. Collez le contenu de `main_fr.gs`.
-3. Paramétrez `TEST_MODE = true` par sécurité, puis Prévisualiser.
+## Requirements
 
----
-## 👤 Author | Auteur
-**Thibault Fayol – Consultant SEA PME**  
-🔗 Website: [https://thibaultfayol.com](https://thibaultfayol.com)  
+- Google Ads account with Search campaigns
+- Google Ads Scripts access
 
-💡 *L'analyse des requêtes prend du temps. Gagnez des heures et maximisez votre ROI en me déléguant la gestion de vos mots-clés.* | *Query analysis takes time. Save hours and maximize your ROI by delegating your keyword management to me.*
+## License
 
----
-## 📄 License | Licence
-MIT
+MIT — Thibault Fayol Consulting
